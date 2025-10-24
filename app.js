@@ -1,27 +1,31 @@
 // Rahman SMM Panel v3 - Frontend
-// ✅ Sudah konek ke API: https://to-tr8y.vercel.app
+// ✅ Terhubung ke API: https://3-auto.vercel.app
 
-const API_URL = "https://to-tr8y.vercel.app";
+const API_URL = "https://3-auto.vercel.app";
 
 async function loadUser() {
   try {
     const res = await fetch(`${API_URL}/api/user`);
+    if (!res.ok) throw new Error("Gagal ambil data user");
     const user = await res.json();
-    document.getElementById("username").innerText = user.username;
-    document.getElementById("balance").innerText = `Rp${user.balance.toLocaleString()}`;
+    document.getElementById("username").innerText = user.username || "Guest";
+    document.getElementById("balance").innerText = `Rp${user.balance?.toLocaleString() || 0}`;
   } catch (err) {
-    console.error("Gagal ambil data user:", err);
+    console.error("Error user:", err);
+    alert("Gagal konek ke API User. Coba refresh halaman.");
   }
 }
 
 async function loadServices() {
   try {
     const res = await fetch(`${API_URL}/api/services`);
+    if (!res.ok) throw new Error("Gagal ambil data layanan");
     const services = await res.json();
     const select = document.getElementById("service");
     select.innerHTML = services.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
   } catch (err) {
-    console.error("Gagal ambil layanan:", err);
+    console.error("Error layanan:", err);
+    alert("Gagal konek ke API Layanan. Pastikan API aktif.");
   }
 }
 
@@ -38,10 +42,12 @@ async function makeOrder() {
     });
 
     const data = await res.json();
-    alert(data.error ? data.error : `Pesanan berhasil! ID: ${data.order.id}`);
+    if (data.error) alert(`❌ ${data.error}`);
+    else alert(`✅ Pesanan berhasil!\nID: ${data.order.id}`);
     loadUser();
   } catch (err) {
-    alert("Gagal konek ke API!");
+    console.error("Error order:", err);
+    alert("Gagal membuat pesanan. Coba lagi nanti.");
   }
 }
 
@@ -49,4 +55,3 @@ document.addEventListener("DOMContentLoaded", () => {
   loadUser();
   loadServices();
 });
-
